@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate(); // ✅ correct place
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
     try {
-        const config = { headers: { 'Content-Type': 'application/json' } };
-        const { data } = await axios.post('https://shopz-backend.onrender.com/api/users/login', { email, password }, config);
-        localStorage.setItem('userInfo', JSON.stringify(data));
-        window.location.href = '/';
+      const { data } = await axios.post(
+        'https://shopz-backend.onrender.com/api/users/login',
+        { email, password }
+      );
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      navigate('/'); // ✅ correct
     } catch (err) {
-        setLoading(false);
-        setError(err.response && err.response.data.message ? err.response.data.message : err.message);
+      console.error(err);
     }
   };
 
