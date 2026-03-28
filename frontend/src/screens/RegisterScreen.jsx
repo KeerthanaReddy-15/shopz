@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const RegisterScreen = () => {
@@ -9,6 +9,7 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -23,7 +24,7 @@ const RegisterScreen = () => {
         const { data } = await axios.post('https://shopz-backend.onrender.com/api/users/register', { name, email, password }, config);
         // Prevent auto-login by not storing userInfo right away
         // localStorage.setItem('userInfo', JSON.stringify(data));
-        window.location.href = '/login';
+        navigate('/login');
     } catch (err) {
         setLoading(false);
         setError(err.response && err.response.data.message ? err.response.data.message : err.message);
