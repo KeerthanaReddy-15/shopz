@@ -35,8 +35,8 @@ const PORT = process.env.PORT || 5000;
 
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI;
-    const mongoUri = process.env.MONGO_URI;
+    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shopping';
+
 
 console.log("MONGO_URI: - server.js:41", mongoUri);
 
