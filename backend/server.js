@@ -36,18 +36,17 @@ const PORT = process.env.PORT || 5000;
 const connectDB = async () => {
   try {
     const mongoUri = process.env.MONGO_URI;
-    if (!mongoUri) {
-  console.error("MONGO_URI is missing ❌ - server.js:40");
-  process.exit(1);
-}
+    const mongoUri = process.env.MONGO_URI;
+
+console.log("MONGO_URI: - server.js:41", mongoUri);
 
     await mongoose.connect(mongoUri);
-    console.log(`MongoDB Connected: ${mongoose.connection.host} - server.js:45`);
+    console.log(`MongoDB Connected: ${mongoose.connection.host} - server.js:44`);
 
     // Auto seed on startup to ensure data is always present in compass
     const userCount = await User.countDocuments();
     if(userCount === 0) {
-      console.log('Seeding data into MongoDB local storage... - server.js:50');
+      console.log('Seeding data into MongoDB local storage... - server.js:49');
       await Order.deleteMany();
       await Product.deleteMany();
       await User.deleteMany();
@@ -57,14 +56,14 @@ const connectDB = async () => {
 
       const sampleProducts = products.map((p) => ({ ...p, user: adminUser }));
       await Product.insertMany(sampleProducts);
-      console.log('Local DB Seeded successfully! - server.js:60');
+      console.log('Local DB Seeded successfully! - server.js:59');
     } else {
-      console.log('Data exists in DB. Skipping autoseed. - server.js:62');
+      console.log('Data exists in DB. Skipping autoseed. - server.js:61');
     }
 
-    app.listen(PORT, () => console.log(`Server running on port ${PORT} - server.js:65`));
+    app.listen(PORT, () => console.log(`Server running on port ${PORT} - server.js:64`));
   } catch (error) {
-    console.error(`Error: ${error.message} - server.js:67`);
+    console.error(`Error: ${error.message} - server.js:66`);
     process.exit(1);
   }
 };
