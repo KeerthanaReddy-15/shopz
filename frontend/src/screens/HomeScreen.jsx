@@ -18,16 +18,19 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const url = queryKeyword ? `http://localhost:5000/api/products?keyword=${queryKeyword}` : `http://localhost:5000/api/products`;
-        const { data } = await axios.get(url);
-        setProducts(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching products', error);
-        setLoading(false);
-      }
-    };
+  try {
+    const url = queryKeyword 
+      ? `https://shopz-backend.onrender.com/api/products?keyword=${queryKeyword}`
+      : `https://shopz-backend.onrender.com/api/products`;
+
+    const { data } = await axios.get(url);
+    setProducts(data);
+    setLoading(false);
+  } catch (error) {
+    console.error('Error fetching products', error);
+    setLoading(false);
+  }
+};
     fetchProducts();
   }, [queryKeyword]);
 

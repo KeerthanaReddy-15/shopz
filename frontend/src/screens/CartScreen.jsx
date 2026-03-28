@@ -13,7 +13,7 @@ const CartScreen = () => {
       if (userInfo) {
         try {
           const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-          const { data } = await axios.get('http://localhost:5000/api/users/cart', config);
+          const { data } = await axios.get('http://shopz-backend.onrender.com/api/users/cart', config);
           setCartItems(data);
           localStorage.setItem('cartItems', JSON.stringify(data));
         } catch (error) {
@@ -34,7 +34,7 @@ const CartScreen = () => {
     if (userInfo) {
       try {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        await axios.put('http://localhost:5000/api/users/cart', newCart, config);
+        await axios.put('http://shopz-backend.onrender.com/api/users/cart', newCart, config);
       } catch (error) { console.error(error); }
     }
   };

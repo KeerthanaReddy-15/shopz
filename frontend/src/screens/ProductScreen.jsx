@@ -10,7 +10,7 @@ const ProductScreen = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const { data } = await axios.get(`https://shopz-backend.onrender.com/api/products/${id}`);
         setProduct(data);
         setLoading(false);
       } catch (error) {
@@ -61,7 +61,7 @@ const ProductScreen = () => {
               if(userInfo) {
                 try {
                   const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                  await axios.put('http://localhost:5000/api/users/cart', newCart, config);
+                  await axios.put('https://shopz-backend.onrender.com/api/users/cart', newCart, config);
                 } catch(e) { 
                   console.error(e);
                   alert(e.response?.data?.message || 'Failed to sync cart to server');
@@ -81,11 +81,11 @@ const ProductScreen = () => {
               try {
                 const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
                 // Fetch current wishlist
-                const { data: currentWishlist } = await axios.get('http://localhost:5000/api/users/wishlist', config);
+                const { data: currentWishlist } = await axios.get('https://shopz-backend.onrender.com/api/users/wishlist', config);
                 const wishlistIds = currentWishlist ? currentWishlist.filter(p => p).map(p => typeof p === 'object' ? p._id : p) : [];
                 if(!wishlistIds.includes(product._id)) {
                   wishlistIds.push(product._id);
-                  await axios.put('http://localhost:5000/api/users/wishlist', wishlistIds, config);
+                  await axios.put('https://shopz-backend.onrender.com/api/users/wishlist', wishlistIds, config);
                   alert('Added to wishlist!');
                 } else {
                   alert('Already in wishlist!');

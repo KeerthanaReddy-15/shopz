@@ -25,7 +25,7 @@ const PlaceOrderScreen = () => {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${userInfo.token}` } };
       
-      const { data } = await axios.post('http://localhost:5000/api/orders', {
+      const { data } = await axios.post('https://shopz-backend.onrender.com/api/orders', {
         orderItems: cartItems,
         shippingAddress,
         paymentMethod,
@@ -37,7 +37,7 @@ const PlaceOrderScreen = () => {
       
       localStorage.removeItem('cartItems');
       try {
-        await axios.put('http://localhost:5000/api/users/cart', [], config);
+        await axios.put('https://shopz-backend.onrender.com/api/users/cart', [], config);
       } catch(e) { console.error('Failed to clear cart in backend', e) }
       
       navigate(`/order/${data.orderId}`);

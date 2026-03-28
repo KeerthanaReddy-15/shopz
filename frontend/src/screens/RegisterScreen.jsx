@@ -20,7 +20,7 @@ const RegisterScreen = () => {
     setError('');
     try {
         const config = { headers: { 'Content-Type': 'application/json' } };
-        const { data } = await axios.post('http://localhost:5000/api/users/register', { name, email, password }, config);
+        const { data } = await axios.post('https://shopz-backend.onrender.com/api/users/register', { name, email, password }, config);
         // Prevent auto-login by not storing userInfo right away
         // localStorage.setItem('userInfo', JSON.stringify(data));
         window.location.href = '/login';

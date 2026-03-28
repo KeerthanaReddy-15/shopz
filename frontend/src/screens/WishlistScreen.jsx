@@ -15,7 +15,7 @@ const WishlistScreen = () => {
       const fetchWishlist = async () => {
         try {
           const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-          const { data } = await axios.get('http://localhost:5000/api/users/wishlist', config);
+          const { data } = await axios.get('https://shopz-backend.onrender.com/api/users/wishlist', config);
           setWishlistItems(data);
           setLoading(false);
         } catch (error) {
@@ -32,7 +32,7 @@ const WishlistScreen = () => {
     setWishlistItems(newWishlist);
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put('http://localhost:5000/api/users/wishlist', newWishlist.map(w => w._id), config);
+      await axios.put('https://shopz-backend.onrender.com/api/users/wishlist', newWishlist.map(w => w._id), config);
     } catch (error) { console.error(error); }
   };
 
@@ -67,7 +67,7 @@ const WishlistScreen = () => {
                         localStorage.setItem('cartItems', JSON.stringify(newCart));
                         try {
                            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                           await axios.put('http://localhost:5000/api/users/cart', newCart, config);
+                           await axios.put('https://shopz-backend.onrender.com/api/users/cart', newCart, config);
                            alert('Added to cart!');
                         } catch(e) { 
                            console.error(e); 

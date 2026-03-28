@@ -24,7 +24,7 @@ const ProfileScreen = () => {
        const fetchOrders = async () => {
          try {
            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-           const { data } = await axios.get('http://localhost:5000/api/orders/myorders', config);
+           const { data } = await axios.get('https://shopz-backend.onrender.com/api/orders/myorders', config);
            setOrders(data);
          } catch(e) { console.error(e) }
        };
@@ -47,7 +47,7 @@ const ProfileScreen = () => {
                 Authorization: 'Bearer ' + userInfo.token
             } 
         };
-        const { data } = await axios.put('http://localhost:5000/api/users/profile', { id: userInfo._id, name, email, password }, config);
+        const { data } = await axios.put('https://shopz-backend.onrender.com/api/users/profile', { id: userInfo._id, name, email, password }, config);
         localStorage.setItem('userInfo', JSON.stringify(data));
         setLoading(false);
         setPassword('');
