@@ -29,14 +29,27 @@ const CartScreen = () => {
 
   const removeFromCartHandler = async (id) => {
     const newCart = cartItems.filter(x => (x.product || x._id) !== id);
-    setCartItems(newCart);
-    localStorage.setItem('cartItems', JSON.stringify(newCart));
-    if (userInfo) {
-      try {
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        await axios.put('http://shopz-backend.onrender.com/api/users/cart', newCart, config);
-      } catch (error) { console.error(error); }
-    }
+
+setCartItems(newCart);
+localStorage.setItem('cartItems', JSON.stringify(newCart));
+
+if (userInfo) {
+  try {
+    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+
+    const formattedCart = newCart.map(item => ({
+      product: item.product || item._id,
+      name: item.name,
+      image: item.image,
+      price: item.price,
+      qty: item.qty
+    }));
+
+    await axios.put('https://shopz-backend.onrender.com/api/users/cart', formattedCart, config);
+  } catch (error) {
+    console.error(error);
+  }
+}
   };
 
   const checkoutHandler = () => {
