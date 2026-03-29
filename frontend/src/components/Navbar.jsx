@@ -1,12 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate} from 'react-router-dom';
 
 const Navbar = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const navigate =useNavigate();
 
   const logoutHandler = () => {
     localStorage.removeItem('userInfo');
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (
