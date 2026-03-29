@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link,useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-  const navigate =useNavigate();
+  const navigate = useNavigate();
 
   const logoutHandler = () => {
     localStorage.removeItem('userInfo');
@@ -13,75 +13,122 @@ const Navbar = () => {
   return (
     <header className="navbar-header">
       <div className="container nav-container">
+        
+        {/* LOGO */}
         <Link to="/" className="brand">
           <span className="brand-icon">🛍️</span> ShopZ
         </Link>
+
+        {/* NAV LINKS */}
         <nav className="nav-links">
           <Link to="/cart" className="nav-link">
-            Shopping Cart
+            🛒 Cart
           </Link>
+
           {userInfo ? (
             <>
               <Link to="/wishlist" className="nav-link">
-                Wishlist
+                ❤️ Wishlist
               </Link>
+
               <Link to="/profile" className="nav-link">
-                Profile ({userInfo.name})
+                👤 {userInfo.name}
               </Link>
-              <button onClick={logoutHandler} className="nav-link btn-logout" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.95rem' }}>
+
+              <button onClick={logoutHandler} className="logout-btn">
                 Logout
               </button>
             </>
           ) : (
-            <Link to="/login" className="nav-link">
-               Sign In
-            </Link>
+            <button
+              onClick={() => navigate('/login')}
+              className="signin-btn"
+            >
+              Sign In
+            </button>
           )}
         </nav>
       </div>
+
+      {/* CSS */}
       <style>{`
         .navbar-header {
-          background: rgba(15, 23, 42, 0.8);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          background: #0f172a;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
           position: sticky;
           top: 0;
-          z-index: 100;
-          padding: 1rem 0;
+          z-index: 999;
+          padding: 0.8rem 0;
         }
+
         .nav-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          padding: 0 2rem;
         }
+
         .brand {
-          font-size: 1.5rem;
+          font-size: 1.6rem;
           font-weight: 800;
           color: white;
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          text-transform: tracking;
+          text-decoration: none;
         }
+
         .brand-icon {
           font-size: 1.8rem;
         }
+
         .nav-links {
           display: flex;
-          gap: 1.5rem;
+          gap: 1.2rem;
           align-items: center;
         }
+
         .nav-link {
-          color: var(--text-main);
+          color: #e5e7eb;
           font-weight: 500;
-          font-size: 0.95rem;
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          transition: color 0.3s;
+          text-decoration: none;
+          transition: 0.3s;
         }
+
         .nav-link:hover {
-          color: var(--primary);
+          color: #3b82f6;
+        }
+
+        /* SIGN IN BUTTON */
+        .signin-btn {
+          background: #3b82f6;
+          color: white;
+          border: none;
+          padding: 6px 14px;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+
+        .signin-btn:hover {
+          background: #2563eb;
+        }
+
+        /* LOGOUT BUTTON */
+        .logout-btn {
+          background: transparent;
+          border: 1px solid #ef4444;
+          color: #ef4444;
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+          background: #ef4444;
+          color: white;
         }
       `}</style>
     </header>

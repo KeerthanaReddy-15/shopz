@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+.bg-shape{
+  pointer-events:none;
+}
+.bg-shape-1{
+  position:fixed;
+  z-index:-1;
+}

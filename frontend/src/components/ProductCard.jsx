@@ -1,131 +1,117 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const ProductCard = ({ product }) => {
+
+  const addToCartHandler = async () => {
+
+    const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+    const existItem = cart.find(x => x._id === product._id);
+
+    let newCart;
+
+    if (existItem) {
+      newCart = cart.map(x =>
+        x._id === product._id
+          ? { ...x, qty: x.qty + 1 }
+          : x
+      );
+    } else {
+      newCart = [
+        ...cart,
+        {
+          _id: product._id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          qty: 1
+        }
+      ];
+    }
+
+    localStorage.setItem('cartItems', JSON.stringify(newCart));
+
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+    if (userInfo) {
+      try {
+        const config = {
+          headers: { Authorization: `Bearer ${userInfo.token}` }
+        };
+
+        const formattedCart = newCart.map(item => ({
+          product: item._id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          qty: item.qty
+        }));
+
+        await axios.put(
+          'https://shopz-backend.onrender.com/api/users/cart',
+          formattedCart,
+          config
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    alert('Added to cart!');
+  };
+
   return (
     <div className="product-card">
+
       <Link to={`/product/${product._id}`}>
-        <div className="img-container">
-          <img src={product.image} alt={product.name} />
-          <div className="overlay">View Details</div>
-        </div>
+        <img src={product.image} alt={product.name} />
       </Link>
+
       <div className="card-body">
-        <Link to={`/product/${product._id}`}>
-          <h3 className="product-title">{product.name}</h3>
-        </Link>
-        <div className="rating">
-          <span className="stars">{'★'.repeat(Math.round(product.rating))}</span>
-          <span className="reviews">({product.numReviews} reviews)</span>
-        </div>
-        <div className="card-footer">
-          <span className="price">₹{product.price.toLocaleString('en-IN')}</span>
-          <button className="add-btn" onClick={(e) => {
-             e.preventDefault();
-             const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
-             const existItem = cart.find(x => x._id === product._id);
-             if(existItem) {
-               localStorage.setItem('cartItems', JSON.stringify(cart.map(x => x._id === existItem._id ? {...existItem, qty: existItem.qty + 1} : x)));
-             } else {
-               localStorage.setItem('cartItems', JSON.stringify([...cart, {...product, qty: 1}]));
-             }
-             alert('Added to cart!');
-          }}>+</button>
-        </div>
+        <h3>{product.name}</h3>
+        <p>₹{product.price}</p>
+
+        <button className="add-btn" onClick={addToCartHandler}>
+          +
+        </button>
       </div>
+
       <style>{`
         .product-card {
-          background: var(--card-bg);
-          border: 1px solid var(--card-border);
-          border-radius: 16px;
-          overflow: hidden;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          backdrop-filter: var(--glass-backdrop);
-        }
-        .product-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-          border-color: rgba(99, 102, 241, 0.4);
-        }
-        .img-container {
+          background: rgba(255,255,255,0.1);
+          padding: 1rem;
+          border-radius: 12px;
           position: relative;
-          width: 100%;
-          height: 250px;
-          overflow: hidden;
         }
-        .img-container img {
+
+        .product-card img {
           width: 100%;
-          height: 100%;
+          height: 200px;
           object-fit: cover;
-          transition: transform 0.5s;
+          border-radius: 10px;
         }
-        .img-container:hover img {
-          transform: scale(1.1);
-        }
-        .overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(99, 102, 241, 0.6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-        .img-container:hover .overlay {
-          opacity: 1;
-        }
+
         .card-body {
-          padding: 1.5rem;
+          margin-top: 10px;
         }
-        .product-title {
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
-          color: var(--text-main);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .rating {
-          font-size: 0.9rem;
-          color: var(--text-muted);
-          margin-bottom: 1rem;
-        }
-        .stars {
-          color: #fbbf24;
-          letter-spacing: 2px;
-          margin-right: 0.5rem;
-        }
-        .card-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .price {
-          font-size: 1.4rem;
-          font-weight: 800;
-          color: white;
-        }
+
         .add-btn {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: var(--primary);
+          position: absolute;
+          bottom: 15px;
+          right: 15px;
+          background: #3b82f6;
           color: white;
-          font-size: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.3s, transform 0.2s;
-        }
-        .add-btn:hover {
-          background: var(--primary-hover);
-          transform: scale(1.1);
+          border: none;
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          font-size: 18px;
+          cursor: pointer;
         }
       `}</style>
+
     </div>
   );
 };

@@ -1,16 +1,17 @@
-const [error, setError] = useState('');
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
 const LoginScreen = () => {
+  const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate(); // ✅ correct place
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const { data } = await axios.post(
         'https://shopz-backend.onrender.com/api/users/login',
@@ -20,7 +21,9 @@ const LoginScreen = () => {
       localStorage.setItem('userInfo', JSON.stringify(data));
       navigate('/'); // ✅ correct
     } catch (err) {
-      console.error(err);
+      setError('login failed');
+    }finally{
+      setLoading(false);
     }
   };
 

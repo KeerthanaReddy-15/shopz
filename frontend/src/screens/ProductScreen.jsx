@@ -4,20 +4,24 @@ import axios from 'axios';
 
 const ProductScreen = () => {
   const { id } = useParams();
+
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`https://shopz-backend.onrender.com/api/products/${id}`);
+        const { data } = await axios.get(
+          `https://shopz-backend.onrender.com/api/products/${id}`
+        );
         setProduct(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching product', error);
+        console.error(error);
         setLoading(false);
       }
     };
+
     fetchProduct();
   }, [id]);
 
@@ -25,159 +29,227 @@ const ProductScreen = () => {
 
   return (
     <>
-      <Link className="btn btn-light my-3 go-back" to="/">
-        &larr; Go Back
-      </Link>
+      <Link className="go-back" to="/">← Go Back</Link>
+
       <div className="product-layout">
+
+        {/* IMAGE */}
         <div className="product-image">
-          <img src={product.image} alt={product.name} />
+          <img
+            src={product.image}
+            alt={product.name}
+            onError={(e) => {
+              e.target.src = "https://via.placeholder.com/400";
+            }}
+          />
         </div>
+
+        {/* INFO */}
         <div className="product-info">
-          <h2 className="title">{product.name}</h2>
-          <div className="rating">
-             <span className="stars">{'★'.repeat(Math.round(product.rating || 0))}</span>
-             <span>({product.numReviews} reviews)</span>
+          <h2>{product.name}</h2>
+
+          <div className="price">
+            ₹{product.price?.toLocaleString('en-IN')}
           </div>
-          <div className="price">₹{product.price?.toLocaleString('en-IN')}</div>
-          <p className="description">{product.description}</p>
-          <div className="status">
-             Status: {product.countInStock > 0 ? <span className="in-stock">In Stock ({product.countInStock})</span> : <span className="out-of-stock">Out of Stock</span>}
+
+          <p>{product.description}</p>
+
+          {/* STOCK FIX */}
+          <div>
+            {Number(product.countInStock) === 0 ? (
+              <span className="out-of-stock">Out of Stock</span>
+            ) : (
+              <span className="in-stock">In Stock ({product.countInStock})</span>
+            )}
           </div>
-          <div className="action-buttons" style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <button className="btn btn-add" disabled={product.countInStock === 0} onClick={async () => {
-              const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
-              // Use product or _id to find existing items safely across both Mongoose and localStorage formats
-              const existItemId = product._id;
-              const existItem = cart.find(x => (x.product || x._id) === existItemId);
-              let newCart;
-              if (existItem) {
-                newCart = cart.map(x => (x.product || x._id) === existItemId ? { ...x, qty: x.qty + 1 } : x);
-              } else {
-                newCart = [...cart, { product: product._id, name: product.name, image: product.image, price: product.price, qty: 1 }];
-              }
-              localStorage.setItem('cartItems', JSON.stringify(newCart));
-              
-              const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-              if(userInfo) {
-                try {
-                  const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                  await axios.put('https://shopz-backend.onrender.com/api/users/cart', newCart, config);
-                } catch(e) { 
-                  console.error(e);
-                  alert(e.response?.data?.message || 'Failed to sync cart to server');
-                  return;
+
+          {/* BUTTONS */}
+          <div className="btn-group">
+
+            {/* ADD TO CART */}
+            <button
+              className="btn-add"
+              disabled={product.countInStock === 0}
+              onClick={async () => {
+                const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+                const existItem = cart.find(x => x._id === product._id);
+
+                let newCart;
+
+                if (existItem) {
+                  newCart = cart.map(x =>
+                    x._id === product._id
+                      ? { ...x, qty: x.qty + 1 }
+                      : x
+                  );
+                } else {
+                  newCart = [
+                    ...cart,
+                    {
+                      _id: product._id,
+                      name: product.name,
+                      image: product.image,
+                      price: product.price,
+                      qty: 1
+                    }
+                  ];
                 }
-              }
-              alert('Added to cart!');
-            }}>
+
+                localStorage.setItem('cartItems', JSON.stringify(newCart));
+
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+                if (userInfo) {
+                  try {
+                    const config = {
+                      headers: { Authorization: `Bearer ${userInfo.token}` }
+                    };
+
+                    const formattedCart = newCart.map(item => ({
+                      product: item._id,
+                      name: item.name,
+                      image: item.image,
+                      price: item.price,
+                      qty: item.qty
+                    }));
+
+                    await axios.put(
+                      'https://shopz-backend.onrender.com/api/users/cart',
+                      formattedCart,
+                      config
+                    );
+                  } catch (e) {
+                    console.error(e);
+                    alert('Cart sync failed');
+                  }
+                }
+
+                alert('Added to cart!');
+              }}
+            >
               Add To Cart
             </button>
-            <button className="btn btn-light" onClick={async () => {
-              const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-              if (!userInfo) {
-                alert('Please sign in to add to wishlist');
-                return;
-              }
-              try {
-                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                // Fetch current wishlist
-                const { data: currentWishlist } = await axios.get('https://shopz-backend.onrender.com/api/users/wishlist', config);
-                const wishlistIds = currentWishlist ? currentWishlist.filter(p => p).map(p => typeof p === 'object' ? p._id : p) : [];
-                if(!wishlistIds.includes(product._id)) {
-                  wishlistIds.push(product._id);
-                  await axios.put('https://shopz-backend.onrender.com/api/users/wishlist', wishlistIds, config);
-                  alert('Added to wishlist!');
-                } else {
-                  alert('Already in wishlist!');
+
+            {/* WISHLIST */}
+            <button
+              className="btn-light"
+              onClick={async () => {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+                if (!userInfo) {
+                  alert('Please login');
+                  return;
                 }
-              } catch(e) { 
-                console.error(e);
-                alert(e.response?.data?.message || e.message || 'Error adding to wishlist');
-              }
-            }}>
+
+                try {
+                  const config = {
+                    headers: { Authorization: `Bearer ${userInfo.token}` }
+                  };
+
+                  const { data: currentWishlist } = await axios.get(
+                    'https://shopz-backend.onrender.com/api/users/wishlist',
+                    config
+                  );
+
+                  const wishlistIds = currentWishlist
+                    ? currentWishlist.map(p =>
+                        typeof p === 'object' ? p._id : p
+                      )
+                    : [];
+
+                  if (!wishlistIds.includes(product._id)) {
+                    wishlistIds.push(product._id);
+
+                    await axios.put(
+                      'https://shopz-backend.onrender.com/api/users/wishlist',
+                      wishlistIds,
+                      config
+                    );
+
+                    alert('Added to wishlist');
+                  } else {
+                    alert('Already in wishlist');
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+            >
               ❤️ Wishlist
             </button>
+
           </div>
         </div>
       </div>
+
+      {/* CSS */}
       <style>{`
         .go-back {
-          background: rgba(255, 255, 255, 0.1);
-          color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 8px;
           display: inline-block;
-          margin-bottom: 2rem;
-          transition: background 0.3s;
+          margin-bottom: 20px;
+          color: white;
         }
-        .go-back:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
+
         .product-layout {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 4rem;
-          background: var(--card-bg);
-          padding: 3rem;
+          gap: 2rem;
+          background: rgba(15, 23, 42, 0.6);
+          padding: 2rem;
           border-radius: 20px;
-          box-shadow: var(--glass-shadow);
-          backdrop-filter: var(--glass-backdrop);
-          border: 1px solid var(--card-border);
         }
-        @media (max-width: 768px) {
-          .product-layout {
-            grid-template-columns: 1fr;
-            padding: 1.5rem;
-          }
-        }
+
         .product-image img {
           width: 100%;
-          border-radius: 12px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-          transition: transform 0.3s ease;
+          max-height: 400px;
+          object-fit: contain;
+          border-radius: 10px;
         }
-        .product-image img:hover {
-          transform: scale(1.02);
-        }
-        .product-info .title {
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
-          font-weight: 800;
+
+        .product-info {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
           color: white;
         }
-        .product-info .price {
-          font-size: 2rem;
-          color: white;
-          font-weight: 700;
-          margin: 1.5rem 0;
-          background: linear-gradient(135deg, #10b981, #34d399);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+
+        .price {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: #10b981;
         }
-        .description {
-          line-height: 1.8;
-          color: var(--text-muted);
-          font-size: 1.1rem;
-          margin-bottom: 2rem;
+
+        .in-stock {
+          color: #22c55e;
         }
-        .status {
-          font-size: 1.1rem;
-          margin-bottom: 2rem;
-          padding: 1rem;
-          background: rgba(255,255,255,0.05);
-          border-radius: 8px;
+
+        .out-of-stock {
+          color: red;
         }
-        .in-stock { color: var(--success); font-weight: 600; }
-        .out-of-stock { color: var(--danger); font-weight: 600; }
+
+        .btn-group {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+
         .btn-add {
-          font-size: 1.2rem;
-          padding: 1rem;
-          text-transform: uppercase;
-          letter-spacing: 1px;
+          background: #22c55e;
+          color: white;
+          padding: 10px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
         }
-        .btn-add:disabled {
-          background: #475569;
-          cursor: not-allowed;
+
+        .btn-light {
+          background: #3b82f6;
+          color: white;
+          padding: 10px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
         }
       `}</style>
     </>

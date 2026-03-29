@@ -7,124 +7,141 @@ const HomeScreen = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const queryKeyword = searchParams.get('keyword') || '';
 
-  // Mock User Session for demonstration
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
   useEffect(() => {
     const fetchProducts = async () => {
-  try {
-    const url = queryKeyword 
-      ? `https://shopz-backend.onrender.com/api/products?keyword=${queryKeyword}`
-      : `https://shopz-backend.onrender.com/api/products`;
+      try {
+        const url = queryKeyword
+          ? `https://shopz-backend.onrender.com/api/products?keyword=${queryKeyword}`
+          : 'https://shopz-backend.onrender.com/api/products';
 
-    const { data } = await axios.get(url);
-    setProducts(data);
-    setLoading(false);
-  } catch (error) {
-    console.error('Error fetching products', error);
-    setLoading(false);
-  }
-};
+        const { data } = await axios.get(url);
+        setProducts(data);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
+
     fetchProducts();
   }, [queryKeyword]);
 
   const submitSearch = (e) => {
     e.preventDefault();
-    if (keyword.trim()) {
-      navigate(`/?keyword=${keyword}`);
-    } else {
-      navigate('/');
-    }
+    navigate(keyword ? `/?keyword=${keyword}` : '/');
   };
 
   return (
     <>
       <div className="home-header">
-        <h1 className="page-title">
+        <h1 className="title">
           {userInfo ? `Welcome back, ${userInfo.name}!` : 'Latest Products'}
         </h1>
-        
+
         <form onSubmit={submitSearch} className="search-box">
-          <input 
-            type="text" 
-            placeholder="Search products..." 
+          <input
+            type="text"
+            placeholder="Search products..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
-          <button type="submit" className="search-btn">
-            🔍 Search
-          </button>
+          <button type="submit">🔍</button>
         </form>
       </div>
 
       {loading ? (
-        <div className="loader"></div>
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>Loading...</div>
       ) : products.length === 0 ? (
-        <h3 style={{textAlign: 'center', marginTop: '3rem'}}>No products found matching "{queryKeyword}"</h3>
+        <h3 style={{ textAlign: 'center' }}>
+          No products found for "{queryKeyword}"
+        </h3>
       ) : (
         <div className="product-grid">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+          {products.map((p) => (
+            <ProductCard key={p._id} product={p} />
           ))}
         </div>
       )}
+
       <style>{`
+
+        /* HEADER */
         .home-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 2rem;
           flex-wrap: wrap;
-          gap: 1.5rem;
         }
-        .page-title {
-          font-size: 2.2rem;
-          font-weight: 800;
+
+        /* TITLE */
+        .title {
+          font-size: 2rem;
+          font-weight: bold;
           color: white;
-          text-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-          margin: 0;
         }
+
+        /* SEARCH BOX */
         .search-box {
           display: flex;
           align-items: center;
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid var(--card-border);
+          background: rgba(255,255,255,0.1);
           border-radius: 50px;
-          overflow: hidden;
-          padding: 0.3rem 0.5rem;
+          padding: 5px;
+          border: 1px solid rgba(255,255,255,0.2);
         }
+
+        /* INPUT */
         .search-box input {
           background: transparent;
           border: none;
-          padding: 0.6rem 1rem;
-          color: white;
-          font-size: 1rem;
           outline: none;
-          width: 250px;
-        }
-        .search-btn {
-          background: var(--primary);
           color: white;
+          padding: 10px 15px;
+          width: 250px;
+          font-size: 1rem;
+        }
+
+        /* BUTTON */
+        .search-box button {
+          background: #3b82f6;
           border: none;
-          padding: 0.6rem 1.2rem;
+          color: white;
+          padding: 8px 14px;
           border-radius: 50px;
-          font-weight: 600;
-          transition: background 0.3s;
+          cursor: pointer;
         }
-        .search-btn:hover {
-          background: var(--primary-hover);
+
+        /* HOVER EFFECT */
+        .search-box:hover {
+          box-shadow: 0 0 10px rgba(59,130,246,0.5);
         }
+
+        /* GRID */
         .product-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 2rem;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1.5rem;
         }
+
+        @media (max-width: 768px) {
+          .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .search-box input {
+            width: 150px;
+          }
+        }
+
       `}</style>
     </>
   );
